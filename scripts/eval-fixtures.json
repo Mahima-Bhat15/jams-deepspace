@@ -1,0 +1,78 @@
+[
+  {
+    "name": "plain commitment",
+    "messages": [
+      { "author": "Alice", "text": "the export button is broken on safari" },
+      { "author": "Bob", "text": "ugh, again?" },
+      { "author": "Alice", "text": "I'll fix the safari export bug this afternoon" }
+    ],
+    "expect": [{ "keywords": ["export", "safari"], "assignee": "Alice" }]
+  },
+  {
+    "name": "backs out, teammate takes over",
+    "messages": [
+      { "author": "Alice", "text": "I'll take the login timeout bug" },
+      { "author": "Bob", "text": "thanks!" },
+      { "author": "Alice", "text": "actually I can't this week, got pulled into the demo. Bob can you grab login?" },
+      { "author": "Bob", "text": "sure, on it" }
+    ],
+    "expect": [{ "keywords": ["login"], "assignee": "Bob" }]
+  },
+  {
+    "name": "backs out, nobody takes over",
+    "messages": [
+      { "author": "Priya", "text": "I can write the onboarding email copy" },
+      { "author": "Sam", "text": "nice" },
+      { "author": "Priya", "text": "sorry, drop me from the onboarding email, I'm out sick tomorrow" }
+    ],
+    "expect": [{ "keywords": ["onboarding", "email"], "assignee": "" }]
+  },
+  {
+    "name": "suggestion nobody takes",
+    "messages": [
+      { "author": "Sam", "text": "we should probably add rate limiting to the public API at some point" },
+      { "author": "Priya", "text": "yeah agreed" }
+    ],
+    "expect": [{ "keywords": ["rate"], "assignee": "" }]
+  },
+  {
+    "name": "hedge is not a commitment",
+    "messages": [
+      { "author": "Bob", "text": "the dashboard feels slow" },
+      { "author": "Alice", "text": "maybe I'll look at the dashboard queries if I have time" }
+    ],
+    "expect": [{ "keywords": ["dashboard"], "assignee": "" }]
+  },
+  {
+    "name": "chit chat only",
+    "messages": [
+      { "author": "Alice", "text": "morning all" },
+      { "author": "Bob", "text": "morning! anyone watch the game last night?" },
+      { "author": "Sam", "text": "missed it, was it good?" },
+      { "author": "Bob", "text": "overtime, wild" }
+    ],
+    "expect": []
+  },
+  {
+    "name": "cancelled work",
+    "messages": [
+      { "author": "Sam", "text": "I'll migrate the old CSV importer to the new API" },
+      { "author": "Priya", "text": "wait, product just said we're deleting the CSV importer next sprint" },
+      { "author": "Sam", "text": "oh ok, never mind then, not doing the migration" }
+    ],
+    "expect": []
+  },
+  {
+    "name": "request accepted plus a separate commitment",
+    "messages": [
+      { "author": "Alice", "text": "Priya can you update the README with the new env vars?" },
+      { "author": "Priya", "text": "yep, will do today" },
+      { "author": "Bob", "text": "I'll add the staging deploy step to CI" },
+      { "author": "Alice", "text": "perfect, thanks both" }
+    ],
+    "expect": [
+      { "keywords": ["readme", "env"], "assignee": "Priya" },
+      { "keywords": ["staging", "ci", "deploy"], "assignee": "Bob" }
+    ]
+  }
+]
