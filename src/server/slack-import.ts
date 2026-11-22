@@ -25,13 +25,41 @@ const channelList = z.object({
 })
 const history = z.object({ messages: z.array(z.unknown()) })
 
+class SlackReadError extends Error {}
+
+const knownErrors = [
+  'invalid_auth', 'not_authed', 'token_revoked', 'account_inactive', 'missing_scope',
+  'not_in_channel', 'channel_not_found', 'insufficient_credits', 'rate_limited',
+  'ratelimited', 'unauthorized', 'internal_error', 'invalid_arguments',
+]
+
+function knownError(value: unknown) {
+  if (!value || typeof value !== 'object') return undefined
+  const result = value as Record<string, unknown>
+  const summary = [result.code, result.error, result.message].filter(x => typeof x === 'string').join(' ').toLowerCase()
+  return knownErrors.find(code => summary.includes(code))
+}
+
 async function readSlack<T>(tools: ActionTools, endpoint: string, input: object, schema: z.ZodType<T>) {
-  const response = await tools.integration('slack/' + endpoint, input)
-  if (response.success) {
-    const parsed = schema.safeParse(response.data)
-    if (parsed.success) return parsed.data
+  const stage = 'Slack ' + endpoint
+  let response
+  try {
+    response = await tools.integration('slack/' + endpoint, input)
+  } catch {
+    throw new SlackReadError(stage + ': integration request did not complete.')
   }
-  throw new Error('Slack could not return ' + endpoint + '. Check the token, scopes and channel invitation.')
+  const code = knownError(response)
+  if (!response.success) throw new SlackReadError(stage + ': ' + (code ?? 'DeepSpace rejected the request.'))
+  let body: unknown = response.data
+  for (let level = 0; level < 3; level++) {
+    const failure = knownError(body)
+    if (failure) throw new SlackReadError(stage + ': ' + failure)
+    const parsed = schema.safeParse(body)
+    if (parsed.success) return parsed.data
+    if (!body || typeof body !== 'object' || !('data' in body)) break
+    body = body.data
+  }
+  throw new SlackReadError(stage + ': unexpected response format from the integration.')
 }
 
 export const slackImport: ActionHandler<Env> = async ({ userId, env, params, tools }) => {
@@ -68,7 +96,7 @@ export const slackImport: ActionHandler<Env> = async ({ userId, env, params, too
       }
     }
     return { success: true, data: { added, skipped: chosen.length - added } }
-  } catch {
-    return { success: false, error: 'Slack preview or import failed. Check the workspace token, scopes, and #jams-test invitation, then retry.' }
+  } catch (error) {
+    return { success: false, error: error instanceof SlackReadError ? error.message : 'JAMS could not save the Slack import. Retry and check the board.' }
   }
 }

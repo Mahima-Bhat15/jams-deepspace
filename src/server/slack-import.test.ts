@@ -30,6 +30,27 @@ describe('Slack demo import', () => {
     expect(await run([ts])).toMatchObject({ data: { added: 0, skipped: 1 } })
     expect([...rows.values()][0]).toMatchObject({ author: 'Mahi Bhat', slackUser: 'U1' })
   })
+  it('handles wrapped integration data', async () => {
+    vi.mocked(resolveAppRole).mockResolvedValue('admin')
+    const { run, tools } = fixture()
+    const original = tools.integration.getMockImplementation()!
+    tools.integration.mockImplementation(async endpoint => {
+      const reply = await original(endpoint)
+      return { ...reply, data: { data: reply.data } } as unknown as typeof reply
+    })
+    expect(await run()).toMatchObject({ success: true })
+  })
+  it('reports which call failed without returning raw provider text', async () => {
+    vi.mocked(resolveAppRole).mockResolvedValue('admin')
+    const { run, tools } = fixture()
+    const original = tools.integration.getMockImplementation()!
+    tools.integration.mockImplementation(async endpoint => {
+      const reply = await original(endpoint)
+      if (endpoint.endsWith('list-channels')) return reply
+      return { success: false, error: 'missing_scope: private diagnostic' } as unknown as typeof reply
+    })
+    expect(await run()).toEqual({ success: false, error: 'Slack channel-history: missing_scope' })
+  })
   it('refuses member access before contacting Slack', async () => {
     vi.mocked(resolveAppRole).mockResolvedValue('member')
     const { run, tools } = fixture()
