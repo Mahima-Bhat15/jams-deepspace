@@ -1,3 +1,4 @@
+import { slackImport } from '../server/slack-import'
 import type { ActionHandler } from 'deepspace/worker'
 import { resolveAppRole } from 'deepspace/worker'
 import type { Env } from '../../worker'
@@ -72,6 +73,7 @@ async function scanChat({ userId, params, tools, env }: Parameters<ActionHandler
 }
 
 export const actions: Record<string, ActionHandler<Env>> = {
+  slackImport,
   scanChat: async (ctx) => {
     try {
       return await scanChat(ctx)

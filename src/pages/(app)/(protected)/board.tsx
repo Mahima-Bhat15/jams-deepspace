@@ -22,6 +22,7 @@ import {
 import { Check, Quote, ScanSearch, X } from 'lucide-react'
 import { Badge, Button, Input, useToast } from '@/components/ui'
 import { KanbanBoard, type KanbanItem } from '@/components/kanban/Kanban'
+import { SlackImport } from '@/components/SlackImport'
 import { ChatHeader } from '@/components/messaging/chat/ChatHeader'
 import { MessageList } from '@/components/messaging/chat/MessageList'
 import { useChatChannel } from '@/components/messaging/hooks/useChatChannel'
@@ -223,6 +224,7 @@ function TicketsPane({
           <ScanSearch /> Scan chat
         </Button>
       </header>
+      <SlackImport channelId={channelId} admin={user?.role === 'admin'} />
 
       <div className="space-y-6 p-5">
         {pending.length > 0 && (

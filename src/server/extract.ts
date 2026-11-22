@@ -80,6 +80,11 @@ export async function loadChat(
     orderDir: 'desc',
     limit: MAX_MESSAGES,
   })
+  const imports = await roomQuery(env, `app:${env.DEEPSPACE_APP_ID}`, userId, 'slackMessages', {
+    where: { channelId }, orderBy: 'postedAt', orderDir: 'desc', limit: MAX_MESSAGES,
+  })
+  const imported = imports.map(r => ({ id: r.recordId, author: String(r.data.author),
+    text: String(r.data.content), createdAt: String(r.data.postedAt) }))
   return rows
     .filter((r) => !r.data.deleted && !r.data.parentMessageId && String(r.data.content ?? '').trim())
     .map((r) => ({
@@ -88,7 +93,9 @@ export async function loadChat(
       text: String(r.data.content),
       createdAt: String(r.createdAt ?? ''),
     }))
+    .concat(imported)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .slice(-MAX_MESSAGES)
 }
 
 /** The channel's lead is whoever created it. Null if the channel does not exist. */

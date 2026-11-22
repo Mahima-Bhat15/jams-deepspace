@@ -17,6 +17,17 @@ import { ticketsSchema } from './schemas/tickets-schema'
 export const schemas: CollectionSchema[] = [
   ...messagingSchemas,
   ticketsSchema,
+  {
+    name: 'slackMessages',
+    columns: ['channelId', 'author', 'slackUser', 'content', 'postedAt'].map(name => ({
+      name, storage: 'text', interpretation: 'plain', required: true, immutable: true,
+    })),
+    permissions: {
+      viewer: { read: true, create: false, update: false, delete: false },
+      member: { read: true, create: false, update: false, delete: false },
+      admin: { read: true, create: false, update: false, delete: false },
+    },
+  },
   usersSchema,
   settingsSchema,
 ]

@@ -35,6 +35,18 @@ tickets (app room) ──────┘        checks role          ops with m1
 
 **Left out on purpose:** Stripe (nothing to sell in an evaluation), LiveKit and file uploads (the input is text chat), managed knowledge (the context is one channel, which fits in a prompt), cron (scanning on a timer would spend credits on idle channels and make proposals appear with nobody watching; a person pressing Scan is the right trigger at this scale).
 
+## Slack demo import
+
+An app admin can preview the 20 most recent entries in the public Slack channel
+`#jams-test` and share selected user messages on a JAMS board. The worker calls
+DeepSpace's `slack/list-channels` and `slack/channel-history` integrations with
+a server-side `SLACK_BOT_TOKEN`. Install the demo bot with `channels:read`
+and `channels:history`, invite it to that channel, set the secret, and deploy.
+Regular members can scan the shared messages. Original timestamps and Slack
+user IDs are stored. Display names are used when present in history; otherwise
+the Slack ID identifies the author. Duplicate imports in one board use the
+same record ID. The preview reads one page in the dedicated demo workspace.
+
 ## Main tradeoff
 
 **The AI proposes, a human approves.** Full automation would be faster, but a wrong owner on a ticket is worse than a slow one. Every proposal cites its messages, and changes to approved work wait for the lead. The cost is one extra click per ticket.
